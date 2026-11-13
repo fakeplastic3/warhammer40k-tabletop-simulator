@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page, type Locator } from "@playwright/test";
 import type { GameState } from "@tabletop/shared";
 async function snapshot(page: Page, id: string): Promise<GameState> {
   return page.evaluate(async (id) => {
@@ -10,18 +10,32 @@ async function snapshot(page: Page, id: string): Promise<GameState> {
     return (await r.json()).state;
   }, id);
 }
+async function committedClick(page: Page, button: Locator) {
+  const label = page.locator(".battle-log .panel-heading span");
+  const revision = async () =>
+    Number((await label.innerText()).match(/REV (\d+)/)![1]);
+  const before = await revision();
+  await button.click();
+  // A click completes before its socket acknowledgement. Wait for the rendered
+  // authoritative revision before selecting the commander for the next action.
+  await expect.poll(revision).toBeGreaterThan(before);
+}
 async function advance(page: Page) {
-  await page
-    .getByRole("button", {
+  await committedClick(
+    page,
+    page.getByRole("button", {
       name: /^(END PHASE|FINISH PILE-IN|END FIGHT STEP|FINISH CONSOLIDATE)/,
-    })
-    .click();
+    }),
+  );
 }
 async function move(page: Page, x: number) {
   await page.getByLabel("Destination X", { exact: true }).fill(String(x));
   await page.getByLabel("Destination Y", { exact: true }).fill("8");
   await page.getByRole("button", { name: "PREVIEW", exact: true }).click();
-  await page.getByRole("button", { name: "SUBMIT MOVE", exact: true }).click();
+  await committedClick(
+    page,
+    page.getByRole("button", { name: "SUBMIT MOVE", exact: true }),
+  );
 }
 test("two browsers create, join, move, reject, attack, reconnect and finish five rounds", async ({
   browser,
@@ -38,7 +52,10 @@ test("two browsers create, join, move, reject, attack, reconnect and finish five
   await expect(a.getByLabel("Shareable invitation")).toBeVisible();
   await a.getByRole("button", { name: "SETTINGS", exact: true }).click();
   await a.getByLabel("Feature name", { exact: true }).fill("Verified relay");
-  await a.getByRole("button", { name: "APPLY TERRAIN", exact: true }).click();
+  await committedClick(
+    a,
+    a.getByRole("button", { name: "APPLY TERRAIN", exact: true }),
+  );
   await a.getByRole("button", { name: "CLOSE ×", exact: true }).click();
   const invitation = await a.getByLabel("Shareable invitation").inputValue();
   const id = new URL(invitation).pathname.split("/").at(-1)!;
@@ -46,7 +63,7 @@ test("two browsers create, join, move, reject, attack, reconnect and finish five
   await b.getByLabel("Commander name").fill("Browser Beta");
   await b.getByRole("button", { name: "JOIN PRIVATE MATCH" }).click();
   await expect(a.getByRole("button", { name: "BEGIN BATTLE" })).toBeEnabled();
-  await a.getByRole("button", { name: "BEGIN BATTLE" }).click();
+  await committedClick(a, a.getByRole("button", { name: "BEGIN BATTLE" }));
   await expect(a.getByRole("button", { name: /END PHASE/ })).toBeVisible();
   await expect(a.locator("canvas")).toBeVisible();
   await expect(b.locator("canvas")).toBeVisible();
@@ -73,9 +90,10 @@ test("two browsers create, join, move, reject, attack, reconnect and finish five
     if (s.status === "finished") break;
     if (s.reaction) {
       const p = s.reaction.player === 0 ? a : b;
-      await p
-        .getByRole("button", { name: "FINISH REACTIONS", exact: true })
-        .click();
+      await committedClick(
+        p,
+        p.getByRole("button", { name: "FINISH REACTIONS", exact: true }),
+      );
       continue;
     }
     const active = s.phase === "fight" ? s.fightPlayer : s.turn;
