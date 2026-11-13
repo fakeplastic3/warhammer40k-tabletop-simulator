@@ -1,0 +1,34 @@
+{
+  "name": "warhammer40k-tabletop-simulator",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "typecheck": "tsc --noEmit && pnpm --filter @tabletop/web typecheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "node scripts/run.mjs build",
+    "db:generate": "node scripts/database.mjs generate",
+    "db:migrate": "node scripts/database.mjs migrate",
+    "format:check": "prettier --check --ignore-path .gitignore \"**/*.{ts,tsx,mts,mjs,json,css,yml,yaml,md}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.56.1",
+    "@prisma/client": "6.19.0",
+    "@tabletop/game-data": "workspace:*",
+    "@tabletop/game-engine": "workspace:*",
+    "@tabletop/shared": "workspace:*",
+    "@types/node": "^24.10.0",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.0",
+    "prettier": "3.10.1",
+    "socket.io-client": "^4.8.4",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}

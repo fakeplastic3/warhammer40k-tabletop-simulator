@@ -1,0 +1,62 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+model User {
+ id String @id @default(uuid())
+ name String
+ tokenHash String @unique
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ seats MatchPlayer[]
+ armies ArmyConfiguration[]
+}
+model ArmyConfiguration {
+ id String @id @default(uuid())
+ userId String
+ user User @relation(fields:[userId], references:[id])
+ name String
+ configuration Json
+ createdAt DateTime @default(now())
+}
+model Match {
+ id String @id
+ inviteHash String @unique
+ ruleVersion String
+ revision Int @default(0)
+ state Json
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ players MatchPlayer[]
+ actions ActionHistory[]
+}
+model MatchPlayer {
+ id String @id @default(uuid())
+ matchId String
+ userId String
+ seat Int
+ match Match @relation(fields:[matchId], references:[id])
+ user User @relation(fields:[userId], references:[id])
+ @@unique([matchId,seat])
+ @@unique([matchId,userId])
+}
+model ActionHistory {
+ id String @id @default(uuid())
+ matchId String
+ match Match @relation(fields:[matchId], references:[id])
+ requestId String
+ actor Int
+ revision Int
+ action Json
+ events Json
+ previousHash String
+ hash String
+ stateSnapshot Json?
+ stateHash String
+ createdAt DateTime @default(now())
+ @@unique([matchId,requestId])
+ @@unique([matchId,revision])
+}

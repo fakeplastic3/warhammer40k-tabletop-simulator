@@ -1,0 +1,28 @@
+{
+  "name": "@tabletop/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@tabletop/shared": "workspace:*",
+    "@tabletop/game-engine": "workspace:*",
+    "@tabletop/game-data": "workspace:*",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@prisma/client": "6.19.0",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.2",
+    "pg": "^8.16.3",
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.6",
+    "prisma": "6.19.0",
+    "tsup": "^8.5.0"
+  }
+}
