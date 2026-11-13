@@ -25,4 +25,8 @@ Remaining known training assumptions include conservative rectangular path/visib
 
 ## Publishing
 
-The completed local original-profile acceptance gates passed before repository creation. README, deployment instructions, environment template, migrations, CI workflow and source traceability are present. Environment credentials, source DOCX, reference assets, generated artifacts and browser traces are excluded from version control. Publication status and remote CI verification are recorded after the private push; this document does not claim a public deployment or production security certification.
+Published to the verified private repository [fakeplastic3/warhammer40k-tabletop-simulator](https://github.com/fakeplastic3/warhammer40k-tabletop-simulator). All local acceptance gates passed before repository creation. The clean hosted [GitHub Actions run](https://github.com/fakeplastic3/warhammer40k-tabletop-simulator/actions/runs/43377539466) passed for application commit `ecfc3c2`: locked install, migrations, typecheck, lint, formatting, 68 tests, production builds and all five browser scenarios. This final publication record changes documentation only.
+
+The hosted test waits for acknowledged revisions between actions. The battlefield renders only when visible board state changes; optional screenshot capture stays local because software WebGL readback can stall hosted runners. Functional canvas/gameplay assertions remain active in CI.
+
+README, deployment instructions, environment template, migrations and traceability were uploaded. Remote file inventory and private visibility were verified. Environment credentials, source DOCX, reference assets, generated artifacts and browser traces are excluded. No public deployment was performed and no production security certification is claimed.

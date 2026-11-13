@@ -1,5 +1,7 @@
 # VOIDLINE · Warhammer tabletop simulator
 
+[Private repository](https://github.com/fakeplastic3/warhammer40k-tabletop-simulator) · [Verified CI run](https://github.com/fakeplastic3/warhammer40k-tabletop-simulator/actions/runs/43377539466)
+
 A local browser-based two-player training simulator with original infantry graphics, an authoritative TypeScript engine, PixiJS battlefield, Fastify/Socket.IO multiplayer, and PostgreSQL persistence.
 
 **This is a limited training implementation.** It is not complete official Warhammer play. The supplied reference is a condensed DOCX claiming 11th edition; it omits the full Rules Appendix, missions and faction datasheets. No official faction profiles, points or artwork are included. See [implementation status](docs/IMPLEMENTATION_STATUS.md), [coverage](docs/RULES_IMPLEMENTATION.md) and [unresolved rules](docs/UNRESOLVED_RULES.md).
