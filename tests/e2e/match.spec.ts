@@ -139,11 +139,15 @@ test("two browsers create, join, move, reject, attack, reconnect and finish five
     .toBe(JSON.stringify(end));
   await expect(a.locator(".turn-label")).toContainText("BATTLE COMPLETE");
   await expect(b.locator(".turn-label")).toContainText("BATTLE COMPLETE");
-  await a.screenshot({
-    path: "test-results/completed-match.png",
-    fullPage: true,
-  });
   expect(errors).toEqual([]);
+  // Software WebGL screenshot readback can stall on hosted Linux runners.
+  // The functional assertions and real canvas checks above still run in CI.
+  if (!process.env.CI) {
+    await a.screenshot({
+      path: "test-results/completed-match.png",
+      fullPage: true,
+    });
+  }
   await contextB.close();
 });
 
