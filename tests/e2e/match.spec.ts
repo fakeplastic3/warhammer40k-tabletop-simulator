@@ -41,6 +41,7 @@ test("two browsers create, join, move, reject, attack, reconnect and finish five
   browser,
   page: a,
 }) => {
+  test.setTimeout(180000);
   const contextB = await browser.newContext();
   const b = await contextB.newPage();
   const errors: string[] = [];

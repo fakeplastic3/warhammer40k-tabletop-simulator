@@ -22,8 +22,32 @@ export default function Battlefield({
   grid: boolean;
   measure: boolean;
 }) {
+  // Phase/log/CP updates do not change this static tabletop. Avoid rebuilding
+  // graphics/text and submitting continuous GPU frames for those updates.
+  const renderKey = JSON.stringify({
+    width: state.width,
+    height: state.height,
+    lobby: state.status === "lobby",
+    units: state.units.map((u) => ({
+      id: u.id,
+      name: u.name,
+      owner: u.owner,
+      move: u.move,
+      shocked: u.shocked,
+      reserve: u.reserve,
+      models: u.models,
+    })),
+    terrain: state.terrain,
+    objectives: state.objectives,
+    selected,
+    modelId,
+    paths,
+    grid,
+    measure,
+  });
   const host = useRef<HTMLDivElement>(null);
   const current = useRef({
+    renderKey,
     state,
     selected,
     modelId,
@@ -34,6 +58,7 @@ export default function Battlefield({
     measure,
   });
   current.current = {
+    renderKey,
     state,
     selected,
     modelId,
@@ -46,6 +71,7 @@ export default function Battlefield({
   const [ruler, setRuler] = useState("");
   useEffect(() => {
     let disposed = false;
+    let frame: number | undefined;
     const app = new Application();
     let resize: ResizeObserver | undefined;
     let cleanup: (() => void) | undefined;
@@ -53,6 +79,8 @@ export default function Battlefield({
       await app.init({
         background: 0x151e22,
         antialias: true,
+        autoStart: false,
+        sharedTicker: false,
         resizeTo: host.current!,
         resolution: Math.min(devicePixelRatio, 2),
         autoDensity: true,
@@ -238,6 +266,7 @@ export default function Battlefield({
         }
         if (rulerStart)
           g.circle(rulerStart.x, rulerStart.y, 0.1).fill(0xffffff);
+        app.render();
       }
       const down = (e: PointerEvent) => {
         drag = {
@@ -314,13 +343,16 @@ export default function Battlefield({
       };
       resize = new ResizeObserver(draw);
       resize.observe(el);
-      let last = current.current;
-      app.ticker.add(() => {
-        if (last !== current.current) {
-          last = current.current;
+      let last = current.current.renderKey;
+      const refresh = () => {
+        if (disposed) return;
+        if (last !== current.current.renderKey) {
+          last = current.current.renderKey;
           draw();
         }
-      });
+        frame = requestAnimationFrame(refresh);
+      };
+      frame = requestAnimationFrame(refresh);
       draw();
     })().catch((e) => {
       if (host.current)
@@ -328,6 +360,7 @@ export default function Battlefield({
     });
     return () => {
       disposed = true;
+      if (frame !== undefined) cancelAnimationFrame(frame);
       resize?.disconnect();
       cleanup?.();
       if (app.renderer) app.destroy(true, { children: true });
